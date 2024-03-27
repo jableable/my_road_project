@@ -19,6 +19,7 @@ import cv2
 from pyproj import Proj, Transformer
 from imutils import opencv2matplotlib
 import geopandas as gpd
+import os
 
 
 #checks a list of linestrings if there are duplicates in the form of reversed edges
@@ -171,111 +172,82 @@ def return_crossings(lat,lng):
 
 
 
-if __name__ == "__main__":
-    def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_crossings,crossings):        
-
-        #create polygon in UTM to show in red later
-        viewing_polygon = make_viewing_window(make_polygon_for_ox(lat,lng)) 
-        #shift vertices to x- and y- axes
-        shifted_object = shift_to_origin(viewing_polygon[0], viewing_polygon[1], viewing_polygon[2],viewing_polygon[3])       
-        print(shifted_object)
-        xmax = max(shifted_object[0][2][0],shifted_object[0][3][0])   
-        ymax = max(shifted_object[0][1][1],shifted_object[0][2][1])                               
-        shifted_points, xshift, yshift = shifted_object[0:3]
-        #make red polygon out of shifted points to be displayed in plot
-        red_polygon= plt.Polygon(shifted_points,  fill=None, edgecolor='r') 
-
-        #Shift all linestrings to x-axis and y-axis
-        shifted_final_linestrings = []
-        for line in final_linestrings:
-            shifted_line=[]
-            for i in range(len(line.xy[0])):
-                shifted_line.append([line.coords[i][0]-xshift,line.coords[i][1]-yshift])
-            line = LineString(shifted_line)
-            shifted_final_linestrings.append(line)
-
-        #shift all intersections
-        shifted_final_crossings=[]   
-        for crossing in crossings:
-            pt_crossing = Point(crossing)
-            if polygon_unshifted.contains(pt_crossing):
-                shifted_crossing = (crossing[0]-xshift,crossing[1]-yshift)
-                shifted_final_crossings.append(Point(shifted_crossing))
-
-        #open and flip the satellite image (not sure why image needs to be flipped)
-        img = cv2.imread(img_path)
-        img = cv2.flip(img,0)
-
-        #form list of input and output points for affine transformation
-        pts1 = np.float32([[0, 640],
-                            [640, 640], [640, 0]])
-        pts2 = np.float32([shifted_points[1],shifted_points[2],shifted_points[3]])
-
-        #get matrix of affine transformation and apply it to image
-        matrix = cv2.getAffineTransform(pts1, pts2)   
-        result = cv2.warpAffine(img, matrix, (int(xmax), int(ymax)))
-
-        # Plot the satellite image, graph edges, black crossing vertices, and red bounding box
-        fig, ax = plt.subplots()
-        #ax.get_xaxis().set_visible(False)
-        #ax.get_yaxis().set_visible(False)
-        ax.set_xlim(-1,xmax+1)
-        ax.set_ylim(-1,ymax+1)
-        ax.imshow(opencv2matplotlib(result))
-        print(xmax,ymax)
-        for line in shifted_final_linestrings:
-            ax.plot(line.xy[0], line.xy[1], zorder=0)
-        
-        ax.add_patch(red_polygon)
-
-        for point in crossings:
-            ax.scatter(point[0], point[1], s=2, c="black", zorder=1)
-
-        for point in shifted_final_crossings:
-            ax.scatter(shapely.get_coordinates(point)[0][0], shapely.get_coordinates(point)[0][1], s=2, c="black", zorder=1)        
-
-        print(f"I see {len(final_crossings)} crossings!")
-
-        plt.show()
 
 
-    lat , lng = 36.41199155121738,-86.46813606089422
-    poly, edges, crossings, crossings2 = return_crossings(lat , lng)
+#show the satellite image with edges and vertices
+def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_crossings,crossings):        
 
-    visualize_map(lat , lng,
-                img_path="assets/images/dataset/4,36.41199155121738,-86.46813606089422.png",
-                polygon_unshifted = poly,
-                final_linestrings=edges,
-                final_crossings=crossings,crossings=crossings2)
+    #create polygon in UTM to show in red later
+    viewing_polygon = make_viewing_window(make_polygon_for_ox(lat,lng)) 
+    #shift vertices to x- and y- axes
+    shifted_object = shift_to_origin(viewing_polygon[0], viewing_polygon[1], viewing_polygon[2],viewing_polygon[3])       
+    print(shifted_object)
+    xmax = max(shifted_object[0][2][0],shifted_object[0][3][0])   
+    ymax = max(shifted_object[0][1][1],shifted_object[0][2][1])                               
+    shifted_points, xshift, yshift = shifted_object[0:3]
+    #make red polygon out of shifted points to be displayed in plot
+    red_polygon= plt.Polygon(shifted_points,  fill=None, edgecolor='r') 
+
+    #Shift all linestrings to x-axis and y-axis
+    shifted_final_linestrings = []
+    for line in final_linestrings:
+        shifted_line=[]
+        for i in range(len(line.xy[0])):
+            shifted_line.append([line.coords[i][0]-xshift,line.coords[i][1]-yshift])
+        line = LineString(shifted_line)
+        shifted_final_linestrings.append(line)
+
+    #shift all intersections
+    shifted_final_crossings=[]   
+    for crossing in crossings:
+        pt_crossing = Point(crossing)
+        if polygon_unshifted.contains(pt_crossing):
+            shifted_crossing = (crossing[0]-xshift,crossing[1]-yshift)
+            shifted_final_crossings.append(Point(shifted_crossing))
+
+    #open and flip the satellite image (not sure why image needs to be flipped)
+    img = cv2.imread(img_path)
+    img = cv2.flip(img,0)
+
+    #form list of input and output points for affine transformation
+    pts1 = np.float32([[0, 640],
+                        [640, 640], [640, 0]])
+    pts2 = np.float32([shifted_points[1],shifted_points[2],shifted_points[3]])
+
+    #get matrix of affine transformation and apply it to image
+    matrix = cv2.getAffineTransform(pts1, pts2)   
+    result = cv2.warpAffine(img, matrix, (int(xmax), int(ymax)))
+
+    # Plot the satellite image, graph edges, black crossing vertices, and red bounding box
+    fig, ax = plt.subplots()
+    #ax.get_xaxis().set_visible(False)
+    #ax.get_yaxis().set_visible(False)
+    ax.set_xlim(-1,xmax+1)
+    ax.set_ylim(-1,ymax+1)
+    ax.imshow(opencv2matplotlib(result))
+    print(xmax,ymax)
+    for line in shifted_final_linestrings:
+        ax.plot(line.xy[0], line.xy[1], zorder=0)
     
-    boxes=[]
-    contours =[]
-    # make box around each crossing
-    for i, crossing in enumerate(crossings):
-        center = shapely.get_coordinates(crossing)[0]
-        box_xstep = 90
-        box_ystep = 90
-        minx = center[0]-box_xstep
-        miny = center[1]-box_ystep
-        maxx = center[0]+box_xstep
-        maxy = center[1]+box_ystep 
-        cross_box = sgbox(minx,miny,maxx, maxy)
-        boxes.append(cross_box)
-        
-        
-    shifted_contours=[]
-    if len(boxes)>0:
-        multi_poly = shapely.unary_union(boxes)
-        if multi_poly.geom_type == 'MultiPolygon':
-            for poly in multi_poly.geoms:
-                x,y=poly.exterior.xy
-                x=[int(a-xshift) for a in x]
-                y=[int(a-yshift) for a in y]
-                shifted_contours.append(np.array(list(zip(x,y))))
-        elif multi_poly.geom_type == 'Polygon':
-            x,y=multi_poly.exterior.xy
-            x=[int(a-xshift) for a in x]
-            y=[int(a-yshift) for a in y]
-            shifted_contours.append(np.array(list(zip(x,y))))
-        else:
-            print("what?")
+    ax.add_patch(red_polygon)
+
+    for point in crossings:
+        ax.scatter(point[0], point[1], s=2, c="black", zorder=1)
+
+    for point in shifted_final_crossings:
+        ax.scatter(shapely.get_coordinates(point)[0][0], shapely.get_coordinates(point)[0][1], s=2, c="black", zorder=1)        
+
+    print(f"I see {len(final_crossings)} crossings!")
+
+    #plt.show()
+
+    return xshift, yshift, result
+
+lat , lng = 36.41199155121738,-86.46813606089422
+poly, edges, crossings, crossings2 = return_crossings(lat , lng)
+
+visualize_map(lat , lng,
+            img_path="assets/images/dataset/4,36.41199155121738,-86.46813606089422.png",
+            polygon_unshifted = poly,
+            final_linestrings=edges,
+            final_crossings=crossings,crossings=crossings2)
