@@ -72,7 +72,7 @@ def save_cropped_image(orig_filename,crossings,xshift,yshift,transformed_img):
 directory = './assets/images/dataset'
 for file in os.listdir(directory):
     orig_filename = file
-    if orig_filename[0] != "0" and orig_filename[0] != "1":
+    if orig_filename[0] != "0":
         filename = file.strip(".png").split(",")
         print(filename)
         cross_num, lat, lng = filename[0], filename[1], filename[2]
