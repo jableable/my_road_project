@@ -8,51 +8,42 @@ from time import sleep
 import simplejson as json
 import pprint
 import requests
+import os
+from pathlib import Path 
 
-#separate string in .txt file into coordinate pairs
-#with open('./2241_coords.txt', 'r') as input:
-    #coords = input.read().replace('\n', '')
-    #coords = ast.literal_eval(coords)
 
-    #duplicates = []
-    #check for duplicates
-    #for i,pair1 in enumerate(coords):
-        #for j in range(i+1,len(coords)-i):
-            #if abs(pair1[0] - coords[j][0])<=.01:    #check if x-values are close
-                #if abs(pair1[1] - coords[j][1])<=.01:  #check if y-values are close
-                    #print(f"our close points are: {pair1} and {coords[j]}")
-                    #duplicates.append(coords[j])
-    #unique_coords = [x for x in coords if x not in duplicates]
-    #print(len(duplicates),len(unique_coords),len(coords))
+path = Path('./assets/images/dataset/relabeled/')
 
-#with open('./combined_coords_cleaned.txt', 'w') as output:
-    #print(unique_coords,file=output)
+visible_files = [
+    file for file in path.iterdir() if not file.name.startswith(".")
+]
 
-#with open('./combined_coords_cleaned.txt', 'r') as created:
-    #coords = created.read().replace("[","").replace("]","")
-    #coords = coords.replace('\n', '')
-    #coords = ast.literal_eval(coords)
-
-with open('./combined_coords_cleaned.txt', 'r') as input:
-    coords = input.read().replace('\n', '')
-    coords = ast.literal_eval(coords)
-
-for coord in coords:
-    i=0
-    while i<500: 
+directory = './assets/images/dataset/relabeled/'
+#num_remaining=len(os.listdir(directory))
+num_files = len(visible_files)
+counter = 0
+for file in visible_files:
+    if file.name.endswith('.png'):
         try:
-            url = "https://maps.googleapis.com/maps/api/staticmap?center="+str(coords[i][0])+","+str(coords[i][1])+"&zoom=16&size=640x640&maptype=satellite&key=AIzaSyCzzVb_qf0TQgLw3K2y5EE6geyzE6KzQuA"
-            buffer = io.BytesIO(urllib.request.urlopen(url).read())
-            img = Image.open(buffer)
-            filename=str(len(return_crossings(coords[i][0],coords[i][1])[3]))+","+str(coords[i][0])+","+str(coords[i][1])+".png"
-            img.save("./assets/images/dataset/"+filename, quality=100)
-            i+=1
-            print("saved image",i)
-            sleep(1)
+            orig_filename = file.name
+            orig_filename2 = orig_filename.strip(".png").split(",")
+            orig_cross_num, lat, lng = orig_filename2[0], orig_filename2[1], orig_filename2[2]
+            lat = float(lat.replace("'",""))
+            lng = float(lng.replace("'",""))
+            print(lat,lng)
+            poly, edges, crossings, crossings2 = return_crossings(lat, lng)
+            cross_num = len(crossings)
+            new_filename=directory+str(cross_num)+","+str(lat)+","+str(lng)+".png"
+            os.rename(file, new_filename)
+            counter += 1
+            print("old crossing number:",str(orig_cross_num)," new crossing number:",str(cross_num))
+            print(counter,"files down, ",num_files-counter,"to go!")
         except Exception as e:
-            print("error! look:",e)
-            sleep(1)
+            print("error! see:",e)
 
+
+
+            
 
 
 

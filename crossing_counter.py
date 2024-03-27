@@ -263,8 +263,8 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
 
     print(f"I see {len(final_crossings)} crossings!")
     stop = timeit.default_timer()
-    print('Time: ', stop - start)  
-    plt.show()
+    #print('Time: ', stop - start)  
+    #plt.show()
 
     return xshift, yshift, result
 
