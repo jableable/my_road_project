@@ -20,7 +20,9 @@ from pyproj import Proj, Transformer
 from imutils import opencv2matplotlib
 import geopandas as gpd
 import os
+import timeit
 
+start = timeit.default_timer()
 
 #checks a list of linestrings if there are duplicates in the form of reversed edges
 def check_for_reverse(linestrings):
@@ -73,6 +75,30 @@ def make_polygon_for_ox(lat,lng):
     return gmaps_polygon
 
 
+#make expanded shapely.polygon for bug testing (certain edges are being forgotten)
+def make_expanded_polygon_for_ox(lat,lng):
+    #make the bounding polygon with vertices in DD
+    flat_transformer = Transformer.from_crs(4326,3857)  #go from DD to mercator projection
+    coord_in_merc = flat_transformer.transform(lat,lng)
+    step = 2000    #2000 to catch every edge?
+    SW = coord_in_merc[0]-step,coord_in_merc[1]-step
+    SE = coord_in_merc[0]+step,coord_in_merc[1]-step
+    NW = coord_in_merc[0]-step,coord_in_merc[1]+step
+    NE = coord_in_merc[0]+step,coord_in_merc[1]+step
+    #when switching back, need to swap lat/lng
+    curved_transformer = Transformer.from_crs(3857,4326)    #go from mercator projection back to DD
+    gmaps_SW = curved_transformer.transform(SW[0],SW[1])
+    gmaps_SW = [gmaps_SW[1-i] for i in range(2)]
+    gmaps_SE = curved_transformer.transform(SE[0],SE[1])
+    gmaps_SE = [gmaps_SE[1-i] for i in range(2)]
+    gmaps_NW = curved_transformer.transform(NW[0],NW[1])
+    gmaps_NW = [gmaps_NW[1-i] for i in range(2)]
+    gmaps_NE = curved_transformer.transform(NE[0],NE[1])
+    gmaps_NE = [gmaps_NE[1-i] for i in range(2)]
+    gmaps_polygon = Polygon([gmaps_SW,gmaps_NW,gmaps_NE,gmaps_SE])
+    return gmaps_polygon
+
+
 #make the red bounding polygon in UTM (need to perform affine transformation from gmaps_polygon to here)
 def make_viewing_window(gmaps_polygon):
     old_poly = list(gmaps_polygon.exterior.coords)
@@ -100,7 +126,7 @@ def return_crossings(lat,lng):
     #make a graph object if possible (whose edges are contained within gmaps_polygon)
     try:
         G = ox.project_graph(ox.graph_from_polygon(
-            polygon=make_polygon_for_ox(lat,lng),
+            polygon=make_expanded_polygon_for_ox(lat,lng),
             network_type="drive",
             truncate_by_edge=True,
             retain_all=True,
@@ -114,9 +140,9 @@ def return_crossings(lat,lng):
     edges = ox.graph_to_gdfs(G, nodes=False)
 
     #prevent calculation of edge intersections if too many edges
-    if len(edges)>800:     
-        print(f"that's a lot of edges...{len(edges)} in fact!")
-        return "too_many_edges"
+    #if len(edges)>900:     
+        #print(f"that's a lot of edges...{len(edges)} in fact!")
+        #return "too_many_edges"
     
     multi_line = edges.geometry.values
 
@@ -181,7 +207,6 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
     viewing_polygon = make_viewing_window(make_polygon_for_ox(lat,lng)) 
     #shift vertices to x- and y- axes
     shifted_object = shift_to_origin(viewing_polygon[0], viewing_polygon[1], viewing_polygon[2],viewing_polygon[3])       
-    print(shifted_object)
     xmax = max(shifted_object[0][2][0],shifted_object[0][3][0])   
     ymax = max(shifted_object[0][1][1],shifted_object[0][2][1])                               
     shifted_points, xshift, yshift = shifted_object[0:3]
@@ -225,7 +250,6 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
     ax.set_xlim(-1,xmax+1)
     ax.set_ylim(-1,ymax+1)
     ax.imshow(opencv2matplotlib(result))
-    print(xmax,ymax)
     for line in shifted_final_linestrings:
         ax.plot(line.xy[0], line.xy[1], zorder=0)
     
@@ -238,17 +262,19 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
         ax.scatter(shapely.get_coordinates(point)[0][0], shapely.get_coordinates(point)[0][1], s=2, c="black", zorder=1)        
 
     print(f"I see {len(final_crossings)} crossings!")
-
-    #plt.show()
+    stop = timeit.default_timer()
+    print('Time: ', stop - start)  
+    plt.show()
 
     return xshift, yshift, result
 
 if __name__ == "__main__":
-    lat , lng = 36.41199155121738,-86.46813606089422
-    poly, edges, crossings, crossings2 = return_crossings(lat , lng)
+    cross_num, lat, lng = 54,42.32150531841124,-83.08196060210685
+    return_crossings(lat, lng)
+    poly, edges, crossings, crossings2 = return_crossings(lat, lng)
 
     visualize_map(lat , lng,
-                img_path="assets/images/dataset/4,36.41199155121738,-86.46813606089422.png",
+                img_path="assets/images/dataset/"+str(cross_num)+","+str(lat)+","+str(lng)+".png",
                 polygon_unshifted = poly,
                 final_linestrings=edges,
                 final_crossings=crossings,crossings=crossings2)
