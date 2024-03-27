@@ -243,11 +243,12 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
 
     return xshift, yshift, result
 
-lat , lng = 36.41199155121738,-86.46813606089422
-poly, edges, crossings, crossings2 = return_crossings(lat , lng)
+if __name__ == "__main__":
+    lat , lng = 36.41199155121738,-86.46813606089422
+    poly, edges, crossings, crossings2 = return_crossings(lat , lng)
 
-visualize_map(lat , lng,
-            img_path="assets/images/dataset/4,36.41199155121738,-86.46813606089422.png",
-            polygon_unshifted = poly,
-            final_linestrings=edges,
-            final_crossings=crossings,crossings=crossings2)
+    visualize_map(lat , lng,
+                img_path="assets/images/dataset/4,36.41199155121738,-86.46813606089422.png",
+                polygon_unshifted = poly,
+                final_linestrings=edges,
+                final_crossings=crossings,crossings=crossings2)
