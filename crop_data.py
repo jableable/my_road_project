@@ -89,6 +89,7 @@ for file in os.listdir(directory):
                 final_crossings=crossings,crossings=crossings2)
         
         save_cropped_image(orig_filename,crossings,xshift,yshift,transformed_img)
+        plt.clf()
             
 
 
