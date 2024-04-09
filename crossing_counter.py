@@ -12,14 +12,11 @@ from shapely.ops import (
     Polygon
 )
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
 import utm
 import cv2
-from pyproj import Proj, Transformer
+from pyproj import Transformer
 from imutils import opencv2matplotlib
-import geopandas as gpd
-import os
 import timeit
 
 start = timeit.default_timer()
@@ -51,12 +48,12 @@ def get_intersections(lines):
     return point_intersections, line_intersections
 
 
-#make a shapely.polygon to feed into OSMnx graph_from_polygon
-def make_polygon_for_ox(lat,lng):
+#make a shapely.polygon to feed into OSMnx graph_from_polygon 
+#step = 764.37037 intended for 640px x 640px Google Maps API images
+def make_polygon_for_ox(lat, lng, step = 764.37037):
     #make the bounding polygon with vertices in DD
     flat_transformer = Transformer.from_crs(4326,3857)  #go from DD to mercator projection
-    coord_in_merc = flat_transformer.transform(lat,lng)
-    step = 764.37037    #764.37037 intended for 640px x 640px Google Maps API images
+    coord_in_merc = flat_transformer.transform(lat,lng) 
     SW = coord_in_merc[0]-step,coord_in_merc[1]-step
     SE = coord_in_merc[0]+step,coord_in_merc[1]-step
     NW = coord_in_merc[0]-step,coord_in_merc[1]+step
@@ -76,15 +73,16 @@ def make_polygon_for_ox(lat,lng):
 
 
 #make expanded shapely.polygon for bug testing (certain edges are being forgotten)
-def make_expanded_polygon_for_ox(lat,lng):
+#  big_step = 2000 to catch every edge?
+def make_expanded_polygon_for_ox(lat,lng, big_step = 2000):
     #make the bounding polygon with vertices in DD
     flat_transformer = Transformer.from_crs(4326,3857)  #go from DD to mercator projection
     coord_in_merc = flat_transformer.transform(lat,lng)
-    step = 2000    #2000 to catch every edge?
-    SW = coord_in_merc[0]-step,coord_in_merc[1]-step
-    SE = coord_in_merc[0]+step,coord_in_merc[1]-step
-    NW = coord_in_merc[0]-step,coord_in_merc[1]+step
-    NE = coord_in_merc[0]+step,coord_in_merc[1]+step
+
+    SW = coord_in_merc[0]-big_step,coord_in_merc[1]-big_step
+    SE = coord_in_merc[0]+big_step,coord_in_merc[1]-big_step
+    NW = coord_in_merc[0]-big_step,coord_in_merc[1]+big_step
+    NE = coord_in_merc[0]+big_step,coord_in_merc[1]+big_step
     #when switching back, need to swap lat/lng
     curved_transformer = Transformer.from_crs(3857,4326)    #go from mercator projection back to DD
     gmaps_SW = curved_transformer.transform(SW[0],SW[1])
@@ -121,12 +119,12 @@ def shift_to_origin(SW,NW,NE,SE):
 
 
 #returns number of crossings within 640px X 640px bounding box centered at (lat,lng)
-def return_crossings(lat,lng):   
+def return_crossings(lat,lng, step = 764.37037, big_step = 2000):   
 
     #make a graph object if possible (whose edges are contained within gmaps_polygon)
     try:
         G = ox.project_graph(ox.graph_from_polygon(
-            polygon=make_expanded_polygon_for_ox(lat,lng),
+            polygon=make_expanded_polygon_for_ox(lat,lng, big_step=big_step),
             network_type="drive",
             truncate_by_edge=True,
             retain_all=True,
@@ -140,14 +138,14 @@ def return_crossings(lat,lng):
     edges = ox.graph_to_gdfs(G, nodes=False)
 
     #prevent calculation of edge intersections if too many edges
-    #if len(edges)>900:     
-        #print(f"that's a lot of edges...{len(edges)} in fact!")
-        #return "too_many_edges"
+    if len(edges)>1100:     #1100 seems about right
+        print(f"that's a lot of edges...{len(edges)} in fact!")
+        return "too_many_edges"
     
     multi_line = edges.geometry.values
 
     #create polygon in UTM to show in red later
-    viewing_polygon = make_viewing_window(make_polygon_for_ox(lat,lng))     
+    viewing_polygon = make_viewing_window(make_polygon_for_ox(lat,lng,step))     
 
     #make polygon to check if intersections fall within
     polygon_unshifted = Polygon(viewing_polygon) 
@@ -166,7 +164,6 @@ def return_crossings(lat,lng):
     # Get all intersections (including nodes)
     intersections = get_intersections(final_linestrings)[0]
     if len(intersections)==0:
-        print("no intersections here!")
         return 0
     
     final_intersections = [shapely.get_coordinates(point)[0] for point in intersections]
@@ -195,8 +192,6 @@ def return_crossings(lat,lng):
         if polygon_unshifted.contains(pt_crossing):
             final_crossings.append(pt_crossing)
     return polygon_unshifted,final_linestrings,final_crossings,crossings
-
-
 
 
 
@@ -262,19 +257,23 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
         ax.scatter(shapely.get_coordinates(point)[0][0], shapely.get_coordinates(point)[0][1], s=2, c="black", zorder=1)        
 
     print(f"I see {len(final_crossings)} crossings!")
-    stop = timeit.default_timer()
-    #print('Time: ', stop - start)  
-    #plt.show()
 
     return xshift, yshift, result
 
+#enter desired lat/lng below to see graph/intersections overlaid on satellite image
 if __name__ == "__main__":
-    cross_num, lat, lng = 54,42.32150531841124,-83.08196060210685
-    return_crossings(lat, lng)
-    poly, edges, crossings, crossings2 = return_crossings(lat, lng)
-
-    visualize_map(lat , lng,
-                img_path="assets/images/dataset/"+str(cross_num)+","+str(lat)+","+str(lng)+".png",
-                polygon_unshifted = poly,
-                final_linestrings=edges,
-                final_crossings=crossings,crossings=crossings2)
+    lat, lng = 39.10875730183322, -86.55947381472457
+    object = return_crossings(lat, lng)
+    if type(object) is str:
+        print("we're not graphing that")
+    if type(object) is tuple:
+        poly, edges, crossings, crossings2 = return_crossings(lat, lng)
+        visualize_map(lat, lng,
+            img_path="./assets/images/bloomington_sat_map.png",
+            polygon_unshifted = poly,
+            final_linestrings=edges,
+            final_crossings=crossings,crossings=crossings2)
+        plt.show()
+    if type(object) is int:
+        print("we could graph that, but there are no crossings")
+    
