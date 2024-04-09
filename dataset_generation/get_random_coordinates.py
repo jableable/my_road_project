@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from crossing_counter import return_crossings
 import numpy as np
 from pyproj import Transformer

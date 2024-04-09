@@ -1,24 +1,17 @@
-import ast
+import sys
+sys.path.append('..')
 from crossing_counter import return_crossings
-import io
-from PIL import Image
-import urllib.request
-import cv2
-from time import sleep
-import simplejson as json
-import pprint
-import requests
 import os
 from pathlib import Path 
 
 
-path = Path('./assets/images/dataset/relabeled/')
+path = Path('../assets/images/dataset/relabeled/')
 
 visible_files = [
     file for file in path.iterdir() if not file.name.startswith(".")
 ]
 
-directory = './assets/images/dataset/relabeled/'
+directory = '../assets/images/dataset/relabeled/'
 #num_remaining=len(os.listdir(directory))
 num_files = len(visible_files)
 counter = 0

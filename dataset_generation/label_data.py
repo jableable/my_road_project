@@ -1,4 +1,6 @@
 import ast
+import sys
+sys.path.append('..')
 from crossing_counter import return_crossings
 import io
 from PIL import Image
@@ -17,7 +19,7 @@ for coord in coords:
             buffer = io.BytesIO(urllib.request.urlopen(url).read())
             img = Image.open(buffer)
             filename=str(len(return_crossings(coords[i][0],coords[i][1])[3]))+","+str(coords[i][0])+","+str(coords[i][1])+".png"
-            img.save("./assets/images/dataset/"+filename, quality=100)
+            img.save("../assets/images/dataset/"+filename, quality=100)
             i+=1
             print("saved image",i)
             sleep(1)

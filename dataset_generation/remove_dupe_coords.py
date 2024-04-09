@@ -1,7 +1,7 @@
 import ast
 
 #separate string from get_random_coordinates.py .txt file into coordinate pairs
-with open('./usa_coords', 'r') as input:
+with open('../assets/coordinates/usa_coords.txt', 'r') as input:
     coords = input.read().replace('\n', '')
     coords = ast.literal_eval(coords)
     print(len(coords))

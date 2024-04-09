@@ -1,25 +1,11 @@
+import sys
+sys.path.append('..')
 from crossing_counter import return_crossings, visualize_map
-import collections
-import osmnx as ox
 import shapely
 from shapely.geometry import box as sgbox
-from shapely.ops import (
-    unary_union,
-    polygonize,
-    Point,
-    MultiPoint,
-    LineString,
-    MultiLineString,
-    Polygon
-)
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
-import utm
 import cv2
-from pyproj import Proj, Transformer
-from imutils import opencv2matplotlib
-import geopandas as gpd
 import os
 
 #crop satellite image to only show area surrounding crossings
@@ -65,11 +51,11 @@ def save_cropped_image(orig_filename,crossings,xshift,yshift,transformed_img):
     transformed_img[sel] = fill_color            # and fill it with fill_color
 
     transformed_img = cv2.flip(transformed_img,0)
-    cv2.imwrite("./assets/images/dataset/cropped/"+orig_filename, transformed_img)
+    cv2.imwrite("../assets/images/dataset/cropped/"+orig_filename, transformed_img)
 
 
 
-directory = './assets/images/dataset'
+directory = '../assets/images/dataset'
 for file in os.listdir(directory):
     orig_filename = file
     if orig_filename[0] != "0":
@@ -81,7 +67,7 @@ for file in os.listdir(directory):
         print(lat,lng)
         poly, edges, crossings, crossings2 = return_crossings(lat, lng)
 
-        img_path="assets/images/dataset/"+str(cross_num)+","+str(lat)+","+str(lng)+".png"
+        img_path="../assets/images/dataset/"+str(cross_num)+","+str(lat)+","+str(lng)+".png"
 
         xshift, yshift, transformed_img = visualize_map(lat, lng, img_path,
                 polygon_unshifted=poly,
