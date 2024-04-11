@@ -31,7 +31,7 @@ zoom1_step = 1500
 zoom2_step = 764.37037
 
 #output stops after accumulating 100 coordinates
-while len(list_of_crossings)<=100:
+while len(list_of_crossings)<=200:
     #randomly pick from a rectangular subset of USA
     lat = np.random.uniform(16.5,48)  #range:(-90,90) usa:(32.5,48)
     lon = np.random.uniform(73.5,82) #range:(-180,180) usa:(-117,-81.5)
