@@ -6,13 +6,22 @@ import io
 from PIL import Image
 import urllib.request
 from time import sleep
+import numpy as np
 
-file = 'usa_coords_cleaned'
 
-with open('../assets/coordinates/clean/'+file+'.txt', 'r') as input:
-    coords = input.read().replace('\n', '')
-    coords = ast.literal_eval(coords)
+#use pregenerated coords
+#file = 'usa_coords_cleaned'
+#with open('../assets/coordinates/clean/'+file+'.txt', 'r') as input:
+    #coords = input.read().replace('\n', '')
+    #coords = ast.literal_eval(coords)
 
+#generate random coords
+coords=[]
+for i in range (2000):
+    coords.append((np.random.uniform(32.5,48),np.random.uniform(-117,-81.5)))
+
+
+#get img from Static Maps API and label it according to crossing_counter
 for i, coord in enumerate(coords):
     try:
         filename=str(len(return_crossings(coords[i][0],coords[i][1])[2]))+","+str(coords[i][0])+","+str(coords[i][1])+".png"
