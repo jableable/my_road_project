@@ -15,10 +15,10 @@ with open('../assets/coordinates/clean/'+file+'.txt', 'r') as input:
 
 for i, coord in enumerate(coords):
     try:
+        filename=str(len(return_crossings(coords[i][0],coords[i][1])[2]))+","+str(coords[i][0])+","+str(coords[i][1])+".png"
         url = "https://maps.googleapis.com/maps/api/staticmap?center="+str(coords[i][0])+","+str(coords[i][1])+"&zoom=16&size=640x640&maptype=satellite&key=AIzaSyCzzVb_qf0TQgLw3K2y5EE6geyzE6KzQuA"
         buffer = io.BytesIO(urllib.request.urlopen(url).read())
         img = Image.open(buffer)
-        filename=str(len(return_crossings(coords[i][0],coords[i][1])[2]))+","+str(coords[i][0])+","+str(coords[i][1])+".png"
         img.save("../assets/images/dataset/labeled/"+filename, quality=100)      
         i+=1      
         print("saved image",i)
