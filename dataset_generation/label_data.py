@@ -1,7 +1,7 @@
 import ast
 import sys
 sys.path.append('..')
-from crossing_counter import return_crossings
+from verifying_crossing_counter import return_crossings
 import io
 from PIL import Image
 import urllib.request
@@ -16,9 +16,9 @@ import numpy as np
     #coords = ast.literal_eval(coords)
 
 #generate random coords
-coords=[]
-for i in range (2000):
-    coords.append((np.random.uniform(32.5,48),np.random.uniform(-117,-81.5)))
+coords=[(33.802839772085456,-84.4028637110181)]
+#for i in range (2000):
+    #coords.append((np.random.uniform(32.5,48),np.random.uniform(-117,-81.5)))
 
 
 #get img from Static Maps API and label it according to crossing_counter

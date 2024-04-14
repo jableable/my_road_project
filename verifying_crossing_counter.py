@@ -263,7 +263,7 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
 
 #enter desired lat/lng below to see graph/intersections overlaid on satellite image
 if __name__ == "__main__":
-    coord_info = 4,38.15283787560613,-84.61810282018946
+    coord_info = 1,33.802839772085456,-84.4028637110181
     coord_info_str = str(coord_info[0])+","+str(coord_info[1])+","+str(coord_info[2])
     
     lat, lng = coord_info[1],coord_info[2]
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     if type(object) is tuple:
         poly, edges, crossings, crossings2 = return_crossings(lat, lng)
         visualize_map(lat, lng,
-            img_path="./assets/images/dataset/labeled/"+coord_info_str+".png",
+            img_path="./assets/images/dataset/labeled/usa_combined/1/"+coord_info_str+".png",
             polygon_unshifted = poly,
             final_linestrings=edges,
             final_crossings=crossings,crossings=crossings2)
