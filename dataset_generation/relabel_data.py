@@ -1,18 +1,17 @@
 import sys
 sys.path.append('..')
-from crossing_counter import return_crossings
+from verifying_crossing_counter import return_crossings
 import os
 from pathlib import Path 
 
 
-path = Path('../assets/images/dataset/relabeled/')
+path = Path('../assets/images/dataset/labeled/usa_combined/relabeled_from_1/')
 
 visible_files = [
     file for file in path.iterdir() if not file.name.startswith(".")
 ]
 
-directory = '../assets/images/dataset/relabeled/'
-#num_remaining=len(os.listdir(directory))
+directory = '../assets/images/dataset/labeled/usa_combined/relabeled_from_1/'
 num_files = len(visible_files)
 counter = 0
 for file in visible_files:
@@ -30,7 +29,7 @@ for file in visible_files:
             os.rename(file, new_filename)
             counter += 1
             print("old crossing number:",str(orig_cross_num)," new crossing number:",str(cross_num))
-            print(counter,"files down, ",num_files-counter,"to go!")
+            print(counter,"files down, ",num_files - counter,"to go!")
         except Exception as e:
             print("error! see:",e)
 
