@@ -1,15 +1,10 @@
-import ast
 import sys
 sys.path.append('..')
-from time import sleep
 import os
-
 
 list_of_coords = []
 
-location = "C:/Users/Jared/Documents/GitHub/my_road_project/assets/images/dataset/labeled/"
-
-files = os.listdir("../assets/images/dataset/labeled/totally random coords usa")
+files = os.listdir("../assets/images/dataset/labeled/euro_combined")
 print(len(files))
 for file in files:
     file = file.replace(".png","")

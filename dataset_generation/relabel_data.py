@@ -3,15 +3,21 @@ sys.path.append('..')
 from verifying_crossing_counter import return_crossings
 import os
 from pathlib import Path 
+import ast
+
+file = 'asia'
+with open('../assets/coordinates/too many edges/'+file+'.txt', 'r') as input:
+    coords = input.read().replace('\n', '')
+    coords = ast.literal_eval(coords)
 
 
-path = Path('../assets/images/dataset/labeled/usa_combined/relabeled_from_1/')
+path = Path('../assets/images/dataset/labeled/')
 
 visible_files = [
     file for file in path.iterdir() if not file.name.startswith(".")
 ]
 
-directory = '../assets/images/dataset/labeled/usa_combined/relabeled_from_1/'
+directory = '../assets/images/dataset/labeled/'
 num_files = len(visible_files)
 counter = 0
 for file in visible_files:
@@ -23,13 +29,15 @@ for file in visible_files:
             lat = float(lat.replace("'",""))
             lng = float(lng.replace("'",""))
             print(lat,lng)
-            poly, edges, crossings, crossings2 = return_crossings(lat, lng)
-            cross_num = len(crossings)
-            new_filename=directory+str(cross_num)+","+str(lat)+","+str(lng)+".png"
-            os.rename(file, new_filename)
-            counter += 1
-            print("old crossing number:",str(orig_cross_num)," new crossing number:",str(cross_num))
-            print(counter,"files down, ",num_files - counter,"to go!")
+            if (lat, lng) in coords:
+                print("found a big one")
+                poly, edges, crossings, crossings2 = return_crossings(lat, lng)
+                cross_num = len(crossings)
+                new_filename=directory+str(cross_num)+","+str(lat)+","+str(lng)+".png"
+                os.rename(file, new_filename)
+                counter += 1
+                print("old crossing number:",str(orig_cross_num)," new crossing number:",str(cross_num))
+                print(counter,"files down, ",num_files - counter,"to go!")
         except Exception as e:
             print("error! see:",e)
 

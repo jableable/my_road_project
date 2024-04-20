@@ -141,7 +141,6 @@ def return_crossings(lat,lng, step = 764.37037, big_step = 2000):
     #prevent calculation of edge intersections if too many edges
     if len(edges)>1100:     #1100 seems about right
         print(f"that's a lot of edges...{len(edges)} in fact!")
-        return "too_many_edges"
     
     multi_line = edges.geometry.values
 
@@ -242,7 +241,6 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
     #get matrix of affine transformation and apply it to image
     matrix = cv2.getAffineTransform(pts1, pts2)   
     result = cv2.warpAffine(img, matrix, (int(xmax), int(ymax)))
-    print(matrix)
     shapely_matrix = matrix[0][0],matrix[0][1],matrix[1][0],matrix[1][1],matrix[0][2],matrix[1][2]
 
 
@@ -269,13 +267,22 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
     for line in shifted_final_linestrings:
         ax.plot(line.xy[0], line.xy[1], zorder=0)
     
-    #make blue polygons for grid
+    #make black polygons for grid
+    black_polygons=dict()
     for square in grid:
         nu_square = Polygon(square)
         nu_nu_square = affine_transform(nu_square, shapely_matrix)
-        print(shapely.get_coordinates(nu_nu_square).tolist())
-        blue_polygon= plt.Polygon(shapely.get_coordinates(nu_nu_square).tolist(),  fill=None, edgecolor='b') 
-        ax.add_patch(blue_polygon)
+        black_polygon= plt.Polygon(shapely.get_coordinates(nu_nu_square).tolist(),  fill=None, edgecolor='black',linewidth = .5) 
+        crossing_count = 0
+        for point in shifted_final_crossings:
+            if shapely.contains(nu_nu_square,point):
+                crossing_count += 1
+        black_polygons[nu_nu_square] = crossing_count
+        
+        ax.add_patch(black_polygon)
+    black_polygons_crossing_counts = list(black_polygons.values())
+
+
 
 
     ax.add_patch(red_polygon)
@@ -286,21 +293,21 @@ def visualize_map(lat,lng,img_path,polygon_unshifted,final_linestrings,final_cro
 
     for point in shifted_final_crossings:
         ax.scatter(shapely.get_coordinates(point)[0][0], shapely.get_coordinates(point)[0][1], s=2, c="black", zorder=1)        
-
+    plt.clf()
+    plt.close()
     print(f"I see {len(final_crossings)} crossings!")
 
-    return xshift, yshift, result
-
+    return xshift, yshift, result, black_polygons_crossing_counts
 #enter desired lat/lng below to see graph/intersections overlaid on satellite image
 if __name__ == "__main__":
-    lat, lng = 39.10875730183322, -86.55947381472457
+    lat, lng = 61.15922478833717, -149.91256106342232
     object = return_crossings(lat, lng)
     if type(object) is str:
         print("we're not graphing that")
     if type(object) is tuple:
         poly, edges, crossings, crossings2 = return_crossings(lat, lng)
         visualize_map(lat, lng,
-            img_path="./assets/images/bloomington_sat_map.png",
+            img_path="./assets/images/61.15922478833717, -149.91256106342232.png",
             polygon_unshifted = poly,
             final_linestrings=edges,
             final_crossings=crossings,crossings=crossings2)

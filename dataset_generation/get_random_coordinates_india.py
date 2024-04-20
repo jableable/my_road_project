@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from crossing_counter import return_crossings
+from verifying_crossing_counter import return_crossings
 import numpy as np
 from pyproj import Transformer
 
@@ -31,10 +31,10 @@ zoom1_step = 1500
 zoom2_step = 764.37037
 
 #output stops after accumulating 100 coordinates
-while len(list_of_crossings)<=200:
+while len(list_of_crossings)<=500:
     #randomly pick from a rectangular subset of USA
-    lat = np.random.uniform(16.5,48)  #range:(-90,90) usa:(32.5,48)
-    lon = np.random.uniform(73.5,82) #range:(-180,180) usa:(-117,-81.5)
+    lat = np.random.uniform(43,55)  #range:(-90,90) usa:(32.5,48) asia:(16.5,48) euro:(43,55)
+    lon = np.random.uniform(-1,28) #range:(-180,180) usa:(-117,-81.5) asia: (73.5,82) euro:(-1,28)
     print(f"checking for a new city at {lat,lon}")
     #output of return crossings is either a string, tuple, or integer
     goal = return_crossings(lat,lon,step = city_step, big_step=city_step)

@@ -10,15 +10,15 @@ import numpy as np
 
 
 #use pregenerated coords
-#file = 'usa_coords_cleaned'
+#file = 'euro_coords_cleaned'
 #with open('../assets/coordinates/clean/'+file+'.txt', 'r') as input:
     #coords = input.read().replace('\n', '')
     #coords = ast.literal_eval(coords)
 
 #generate random coords
-coords=[(33.802839772085456,-84.4028637110181)]
-#for i in range (2000):
-    #coords.append((np.random.uniform(32.5,48),np.random.uniform(-117,-81.5)))
+coords=[]
+for i in range (2400):
+    coords.append((np.random.uniform(16.5,48),np.random.uniform(73.5,82)))
 
 
 #get img from Static Maps API and label it according to crossing_counter
@@ -31,10 +31,10 @@ for i, coord in enumerate(coords):
         img.save("../assets/images/dataset/labeled/"+filename, quality=100)      
         i+=1      
         print("saved image",i)
-        sleep(1)
+        sleep(.5)
     except Exception as e:
         print("error at",i, "! look:",e)
-        sleep(1)
+        sleep(.5)
 
 
 

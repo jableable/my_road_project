@@ -132,16 +132,16 @@ def return_crossings(lat,lng, step = 764.37037, big_step = 2000):
         )
     except Exception as e:
         print("error! read:",e)
-        return 0
+        return 0,0,[],0
     
     #extract edges from graph
     edges = ox.graph_to_gdfs(G, nodes=False)
 
     #prevent calculation of edge intersections if too many edges
-    if len(edges)>1100:     #1100 seems about right
-        print(f"that's a lot of edges...{len(edges)} in fact!")
+    if len(edges)>3000:     #1100 seems about right
+        print(f"that's a lot of edges at ({lat},{lng})...{len(edges)} in fact!")
         #comment next line out while labelling images
-        #return "too_many_edges"
+        return "too_many_edges"
     
     multi_line = edges.geometry.values
 
@@ -165,7 +165,8 @@ def return_crossings(lat,lng, step = 764.37037, big_step = 2000):
     # Get all intersections (including nodes)
     intersections = get_intersections(final_linestrings)[0]
     if len(intersections)==0:
-        return 0
+        return 0,0,[],0
+
     
     final_intersections = [shapely.get_coordinates(point)[0] for point in intersections]
 
