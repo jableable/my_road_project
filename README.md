@@ -1,9 +1,3 @@
-Here's a list of steps I think we should follow to get started. Of course, this list is not comprehensive, but it should give us a good starting point. **Think about where you fit in!**
-
-When you're working on a piece of the project, try to follow [these](https://github.com/jableable/road-project/blob/main/collaboration-guide.md) branching and pushing conventions.
-
-We'll likely switch to using "Issues" to request/record feature additions and bug fixes.
-
 # Dataset
 The plan is to train our model on 10,000+ images (likely .png) of satellite data of various parts of cities involving some number of roads/highways, such as this:
 
