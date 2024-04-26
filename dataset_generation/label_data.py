@@ -25,7 +25,7 @@ for i in range (2400):
 for i, coord in enumerate(coords):
     try:
         filename=str(len(return_crossings(coords[i][0],coords[i][1])[2]))+","+str(coords[i][0])+","+str(coords[i][1])+".png"
-        url = "https://maps.googleapis.com/maps/api/staticmap?center="+str(coords[i][0])+","+str(coords[i][1])+"&zoom=16&size=640x640&maptype=satellite&key=AIzaSyCzzVb_qf0TQgLw3K2y5EE6geyzE6KzQuA"
+        url = "https://maps.googleapis.com/maps/api/staticmap?center="+str(coords[i][0])+","+str(coords[i][1])+"&zoom=16&size=640x640&maptype=satellite&key=YOUR_API_KEY_HERE"
         buffer = io.BytesIO(urllib.request.urlopen(url).read())
         img = Image.open(buffer)
         img.save("../assets/images/dataset/labeled/"+filename, quality=100)      
