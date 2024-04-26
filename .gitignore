@@ -4,3 +4,6 @@ labeled/
 old/
 __pycache__/crossing_counter.cpython-312.pyc
 model/sequential-model.ipynb
+*.log
+*.gz
+*.aux

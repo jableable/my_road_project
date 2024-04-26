@@ -19,8 +19,8 @@
 \begin{document}
 	
 
-		\title{Counting Crossings in Images}
-		\author{Jared Able, Sanjay Kumar, Dean Menezes, Henry Tucker, Shawn Williams}
+		\title{Detecting Road Overpasses from Satellite Images}
+		\author{Jared Able}
 		\date{}
 \maketitle
 		
@@ -28,13 +28,14 @@
 	
 	\section{Dataset and Problem}
 	
-	Our dataset will consist of 10,000+ satellite images of road networks across the world obtained either via Google maps or ArcGIS. For a given image with a road network, its label will be the number of times that the network crosses over itself. This number of crossings is one way to measure the complexity of a road network. We will attach these labels to the satellite images via OpenStreetMap data. 
+	Our dataset will consist of 10,000+ satellite images of road networks across the world obtained via Google Maps Static API. For a given satellite image with a road network, its label will be the number of times that the network crosses over itself in the form of an overpass. The number of overpasses is one way to measure the complexity of a road network. We will attach these labels to the satellite images via OpenStreetMap data. 
 	
-	Given an overhead image of some road network, we would like to solve the following problems.
+	Given an overhead satellite image of some road network, we would like to solve the following problems.
 	
 	\begin{problem}
-			Our primary problem is successfully identifying all crossings in the image. Our secondary problems include:
+			Our primary problem is successfully predicting whether or not an overpass is present within a satellite image. Our secondary problems include:
 			\begin{itemize}
+				\item getting an accurate count of overpasses within such an image;
 				\item extracting and simplifying the graph structure underlying the pictured road network;
 				\item and correlating the number of network crossings with geographic and population data such as population size and natural obstacles.
 			\end{itemize}
