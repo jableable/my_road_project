@@ -13,7 +13,7 @@ from sklearn.metrics import confusion_matrix
 
 #initialize learning rate and model name
 lr = .001
-model_name = "model1.keras"
+model_name = "binary_classification_model.keras"
 
 #initialize directory location which contains dataset images
 input_dir = '../../../../all_coords/'
