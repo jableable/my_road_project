@@ -1,76 +1,114 @@
-# Dataset
-The plan is to train our model on 10,000+ images (likely .png) of satellite data of various parts of cities involving some number of roads/highways, such as this:
+# Road Overpass Detection in Satellite Imagery
 
-<p align = "center">
-<img src="./assets/images/la_sat_map.png" width="400" />
+## What This Does
+
+This project uses a CNN to detect road overpasses in satellite imagery. Feed it a satellite image and it tells you whether there's an overpass in it or not.
+
+I trained the model on thousands of satellite images that I automatically labeled using OpenStreetMap data. It hits around 92% accuracy on the validation set.
+
+## Live Demo
+
+There's a demo running on Hugging Face Spaces: [Road Overpass Detector Demo](https://huggingface.co/spaces/jableable/road_project)
+
+You can drop in coordinates and see what the model thinks. No setup required.
+
+<p align="center">
+  <img src="./assets/images/demo_screenshot.png" width="700" />
+</p>
+<p align="center">
+  <em>Screenshot: The live Streamlit app running on Hugging Face Spaces</em>
 </p>
 
-We'll initially limit ourselves to images with at most 10 crossings (upgrading to more crossings if time allows). Here are things that need doing/exploring:
+## How It Works
 
-1. Use Google Maps API to download satellite images of a fixed size based on GPS coordinates
-    * Not sure what fixed size/resolution/zoom should be
-2. Get map bounding box of "crossing_counter_cleaned.py" to agree with bounding box of OpenStreetMap API
-    * These should also agree with Google Maps API images
+**Data Collection:** I used the Google Maps Static API to grab satellite images from different regions (North America, Europe, Asia). Instead of manually labeling thousands of images, I wrote a script that queries OpenStreetMap via OSMnx to count how many overpass crossings are in each image. This gave me labels automatically.
 
-&nbsp;
-
-# Labeling the Dataset
-
-I've already coded "crossing_counter_cleaned.py" to help us automate crossing counts based on the underlying graph representation from OpenStreetMaps. You can see the crossings from the satellite map above as black vertices here:
-
-<p align = "center">
-<img src="./assets/images/la_combined_map.png" width="400" />
+<p align="center">
+  <img src="./assets/images/la_sat_map.png" width="400" />
+  <img src="./assets/images/la_combined_map.png" width="400" />
+</p>
+<p align="center">
+  <em>Left: Raw satellite image • Right: Same tile with OpenStreetMap road graph overlay used for labeling</em>
 </p>
 
-Here are things that need doing/exploring:
+**The Model:** It's a straightforward CNN built in TensorFlow/Keras. I added some data augmentation (random flips, brightness tweaks) to make it more robust. The model outputs a probability - like "95% confident there's an overpass here."
 
-1. Rewrite "crossing_counter_cleaned.py" as a function that another Python file can call
-2. Verify count from "crossing_counter_cleaned.py" on several hundred pictures (we should each take a portion of these)
-    * Can anyone easily make a GUI to make this process smoother? I.e. click a "correct" (or "incorrect") button for an image, automatically save that image in a special folder, then automatically load the next image? 
-3. Get map bounding box of "crossing_counter_cleaned.py" to agree with bounding box of API
+**The Demo:** Built a simple Streamlit app where you can enter lat/long coordinates, fetch the satellite tile, and get an instant prediction. It's deployed on Hugging Face Spaces so anyone can try it.
 
-&nbsp;
+## Installation
 
-# Dataset Processing
+Clone the repo:
+```bash
+git clone https://github.com/yourusername/road-overpass-detector.git
+cd road-overpass-detector
+```
 
-[This](https://rock-feller.github.io/intro.html) is a great place to start when considering how our images should be modified. The fundamental philosophy is to create as diverse a dataset as possible while not occupying an inordinate amount of memory. We'll initially consider black-and-white images for space-saving, and then perhaps upgrade to color if that gives better results (color has 3x the data as black-and-white).
+Install dependencies (use a virtualenv if you want):
+```bash
+pip install osmnx shapely pyproj utm imutils opencv-python matplotlib numpy pandas scikit-learn tensorflow pillow streamlit
+```
 
-Here are things that need doing/exploring:
+If you're going to fetch new images or run the demo locally, you'll need a Google Static Maps API key. Set it as an environment variable:
+```bash
+export goog_api="YOUR_API_KEY"  # Linux/Mac
+set goog_api=YOUR_API_KEY       # Windows
+```
 
-1. Find an automated way to crop/blur out irrelevant features surrounding the road systems (i.e. greenery and water)
-2. Experiment with SVD decomposition to compress our data set in a smart way while maintaining predictive success
+## Usage
 
-&nbsp;
+**Easiest option:** Just use the [web demo](https://huggingface.co/spaces/jableable/road_project). 
 
-# Training the Model
+**Run locally:** If you have the trained model file, you can run the Streamlit app:
+```bash
+streamlit run new_app.py
+```
 
-If you go to "Filter by Topic" on the Data Science Boot Camp course page on Erdős Institute, you can skip to "12 Week: Neural Networks." There's about 2 hours worth of videos to watch on neural networks. After all of us have watched the videos, we should work on the group problem session together sometime soon.
+**Use in your own code:**
+```python
+from keras.models import load_model
+import numpy as np
+from PIL import Image
 
-To experiment, I built a model based on the Erdős Institute model, and I trained it on randomly generated "X" images with a high level of success. I shared some results in our Slack channel. To train a model on 10,000+ images of decent resolution may need some serious computational power. I seem to have access to my university's supercomputer, though I've never used it before.
+model = load_model("best_model.keras")
+img = Image.open("your_image.png").resize((640, 640))
+img_array = np.array(img)[None, ...] / 255.0
 
-Here are things that need doing/exploring:
+pred = model.predict(img_array)
+prob_overpass = pred[0][1] * 100  # second value is overpass probability
 
-1. Determine how layers for CNN will work (seems to be a lot of guess-and-check)
-2. To remove guess-and-check, visualize images after passing through each filter
-    * Are the correct features being retained between layers?
-3. Learn how to make calls to supercomputer
+print(f"Overpass probability: {prob_overpass:.2f}%")
+```
+
+The model expects 640x640 RGB images and outputs `[P(no overpass), P(overpass)]`.
+
+> **Note:** The trained model file (~118 MB) isn't in this repo. You can grab it from the Hugging Face Space or retrain it yourself.
+
+**Retrain from scratch:**
+
+1. Generate a dataset using the scripts in `dataset_generation/` (fetch images, label them with OSM data)
+2. Preprocess using `dataset_processing/`
+3. Train: `python model/binary_classification_model.py`
+
+Fair warning: training from scratch needs a decent GPU and a lot of images (I used ~12,000).
+
+## Example Results
 
 
-&nbsp;
 
-# Some Reach Goals
 
-Once we've accomplished all of the above, here are some next steps that would be very cool to do:
+**With overpass:** Highway interchange with a curved ramp passing over the main road. The model correctly gives this very high confidence.
 
-1. Isotope roads to decrease artificial complexity to get rid of unnecessary crossings
-    * Knowledge of graph theory/knot theory/algebraic topology would be useful
-2. Take direction of traffic (orientation) into account
-3. Indicate <i>where</i> in the image crossings occur by boxing each crossing
-    * These boxes can be programmed to show up in our training data
-4. Explore how low our satellite image resolution can go while maintaining predictive success
-    * This would widely increase our range of application
-5. Is there a correlation between number of crossings and elevation? Or number of crossings and country? Population?
-    * These kinds of statistics can help plan roads according to the area they're in
-6. Can we train our model on satellite images with roads _being hidden_? Namely, can the terrain alone predict the number of road crossings that were built later on?
+**No overpass:** Suburban streets intersecting at ground level. Model correctly predicts no overpass with high confidence.
+
+## Credits
+
+- **OpenStreetMap & OSMnx** - for the road network data that made automatic labeling possible
+- **Google Static Maps API** - for the satellite imagery
+- **TensorFlow/Keras** - for the deep learning framework
+- **Streamlit & Hugging Face Spaces** - for making the demo dead simple to deploy
+
+## License
+
+MIT License - use it however you want. See LICENSE file.
 
 
