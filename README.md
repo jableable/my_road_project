@@ -73,20 +73,9 @@ export goog_api="YOUR_API_KEY"
 setx goog_api "YOUR_API_KEY"
 ```
 
-Access it in Python:
-```python
-import os
-api_key = os.getenv("goog_api")
-```
-
 ## Usage
 
 **Easiest option:** Just use the [web demo](https://huggingface.co/spaces/jableable/road_project). 
-
-**Run locally:** If you have the trained model file, you can run the Streamlit app:
-```bash
-streamlit run new_app.py
-```
 
 **Use in your own code:**
 ```python
@@ -104,7 +93,7 @@ prob_overpass = pred[0][1] * 100  # second value is overpass probability
 print(f"Overpass probability: {prob_overpass:.2f}%")
 ```
 
-The model expects 640x640 RGB images and outputs `[P(no overpass), P(overpass)]`.
+The model outputs an overpass probability between 0% and 100%.
 
 > **Note:** The trained model file (~118 MB) isn't in this repo. You can grab it from the Hugging Face Space or retrain it yourself.
 
@@ -114,7 +103,7 @@ The model expects 640x640 RGB images and outputs `[P(no overpass), P(overpass)]`
 2. Preprocess using `dataset_processing/`
 3. Train: `python model/binary_classification_model.py`
 
-Fair warning: training from scratch needs a decent GPU and a lot of images (I used ~12,000).
+Training from scratch requires ~12k images and a GPU.
 
 ## Credits
 
