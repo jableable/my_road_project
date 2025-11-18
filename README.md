@@ -13,7 +13,7 @@ There's a demo running on Hugging Face Spaces: [Road Overpass Detector Demo](htt
 You can drop in coordinates and see what the model thinks. No setup required.
 
 <p align="center">
-  <img src="./assets/images/demo_screenshot.png" width="700" />
+  <img src="./assets/images/demo_screenshot.png" width="850" />
 </p>
 <p align="center">
   <em>Screenshot: The live Streamlit app running on Hugging Face Spaces</em>
@@ -23,13 +23,20 @@ You can drop in coordinates and see what the model thinks. No setup required.
 
 **Data Collection:** I used the Google Maps Static API to grab satellite images from different regions (North America, Europe, Asia). Instead of manually labeling thousands of images, I wrote a script that queries OpenStreetMap via OSMnx to count how many overpass crossings are in each image. This gave me labels automatically.
 
-<p align="center">
-  <img src="./assets/images/la_sat_map.png" width="400" />
-  <img src="./assets/images/la_combined_map.png" width="400" />
-</p>
-<p align="center">
-  <em>Left: Raw satellite image • Right: Same tile with OpenStreetMap road graph overlay used for labeling</em>
-</p>
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" style="padding: 10px;">
+        <img src="./assets/images/la_sat_map.png" width="400" /><br/>
+        <em>Raw satellite image</em>
+      </td>
+      <td align="center" style="padding: 10px;">
+        <img src="./assets/images/la_combined_map.png" width="400" /><br/>
+        <em>With OpenStreetMap road graph overlay</em>
+      </td>
+    </tr>
+  </table>
+</div>
 
 **The Model:** It's a straightforward CNN built in TensorFlow/Keras. I added some data augmentation (random flips, brightness tweaks) to make it more robust. The model outputs a probability - like "95% confident there's an overpass here."
 
@@ -90,15 +97,6 @@ The model expects 640x640 RGB images and outputs `[P(no overpass), P(overpass)]`
 3. Train: `python model/binary_classification_model.py`
 
 Fair warning: training from scratch needs a decent GPU and a lot of images (I used ~12,000).
-
-## Example Results
-
-
-
-
-**With overpass:** Highway interchange with a curved ramp passing over the main road. The model correctly gives this very high confidence.
-
-**No overpass:** Suburban streets intersecting at ground level. Model correctly predicts no overpass with high confidence.
 
 ## Credits
 
