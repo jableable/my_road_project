@@ -44,21 +44,39 @@ You can drop in coordinates and see what the model thinks. No setup required.
 
 ## Installation
 
-Clone the repo:
+Clone the repository:
 ```bash
-git clone https://github.com/yourusername/road-overpass-detector.git
-cd road-overpass-detector
+git clone https://github.com/jableable/my_road_project.git
+cd my_road_project
 ```
 
-Install dependencies (use a virtualenv if you want):
+**Option 1: Conda (recommended)**  
+Create the environment using the provided `environment.yml`:
 ```bash
-pip install osmnx shapely pyproj utm imutils opencv-python matplotlib numpy pandas scikit-learn tensorflow pillow streamlit
+conda env create -f environment.yml
+conda activate roadproject
 ```
 
-If you're going to fetch new images or run the demo locally, you'll need a Google Static Maps API key. Set it as an environment variable:
+**Option 2: Pip (lightweight)**  
+Install the minimal pinned dependencies:
 ```bash
-export goog_api="YOUR_API_KEY"  # Linux/Mac
-set goog_api=YOUR_API_KEY       # Windows
+pip install -r requirements.txt
+```
+
+**Google Static Maps API (optional)**  
+If you want to generate new satellite tiles or run the full demo, set your Google Static Maps API key as an environment variable:
+```bash
+# Linux / macOS
+export goog_api="YOUR_API_KEY"
+
+# Windows (PowerShell)
+setx goog_api "YOUR_API_KEY"
+```
+
+Access it in Python:
+```python
+import os
+api_key = os.getenv("goog_api")
 ```
 
 ## Usage
