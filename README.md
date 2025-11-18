@@ -83,9 +83,9 @@ from keras.models import load_model
 import numpy as np
 from PIL import Image
 
-model = load_model("best_model.keras")
-img = Image.open("your_image.png").resize((640, 640))
-img_array = np.array(img)[None, ...] / 255.0
+model = load_model("0.0008-0.92.keras")  # or binary_classification_model.keras
+img = Image.open("your_image.png").convert("RGB").resize((640, 640))
+img_array = np.array(img)[None, ...]  # no /255, model rescales internally
 
 pred = model.predict(img_array)
 prob_overpass = pred[0][1] * 100  # second value is overpass probability
@@ -95,7 +95,7 @@ print(f"Overpass probability: {prob_overpass:.2f}%")
 
 The model outputs an overpass probability between 0% and 100%.
 
-> **Note:** The trained model file (~118 MB) isn't in this repo. You can grab it from the Hugging Face Space or retrain it yourself.
+> **Note:** The trained model file (~2.3 GB) isn't in this repo. You can grab it from the Hugging Face Space or retrain it yourself.
 
 **Retrain from scratch:**
 
@@ -110,7 +110,7 @@ Training from scratch requires ~12k images and a GPU.
 - **OpenStreetMap & OSMnx** - for the road network data that made automatic labeling possible
 - **Google Static Maps API** - for the satellite imagery
 - **TensorFlow/Keras** - for the deep learning framework
-- **Streamlit & Hugging Face Spaces** - for making the demo dead simple to deploy
+- **Streamlit & Hugging Face Spaces** - for making the demo simple to deploy
 
 ## License
 
